@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { Etapas } from './components/Etapas';
 import { NotasFiscais } from './components/NotasFiscais';
 import { CNO } from './components/CNO';
+import { Estatisticas } from './components/Estatisticas';
 import { Modal } from './components/Modal';
 import { ModalEditarPCI } from './components/ModalEditarPCI';
 import { OBRA_INFO as dadosIniciais, getPCIItens, savePCIValor } from './data/pci';
@@ -12,7 +13,8 @@ const ABAS = [
   { id: 'dashboard', label: '📊 Dashboard' },
   { id: 'etapas',    label: '🏗️ Por Etapa'  },
   { id: 'nf',        label: '🧾 Notas Fiscais' },
-  { id: 'cno',       label: '📋 CNO' },
+  { id: 'cno', label: '📋 CNO' },
+  { id: 'stats', label: '📈 Estatísticas' },
 ];
 
 export default function App() {
@@ -123,6 +125,7 @@ export default function App() {
       )}
       {abaAtiva === 'nf' && <NotasFiscais itens={itens} onEditar={abrirEditar} />}
       {abaAtiva === 'cno' && <CNO itens={itens} pciItens={pciItens} />}
+      {abaAtiva === 'stats' && <Estatisticas itens={itens} pciItens={pciItens} totalPCI={totalPCI} />}
 
       {/* Modal lançamento */}
       <Modal aberto={modalAberto}
