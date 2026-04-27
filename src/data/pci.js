@@ -22,14 +22,14 @@ export const PCI_ITENS = [
 ];
 
 export const OBRA_INFO = {
-  proprietario: "Fabiano Carbonell da Silva",
-  cpf: "982.762.390-72",
-  endereco: "Rua José de Alencar, 419 - Unidade 09",
+  proprietario: "Fabiano da Silva",
+  cpf: "982.xxx.xxx-72",
+  endereco: "Rua José de Alencar, 419 - ",
   cidade: "Pinhais/PR",
-  cep: "83.321-230",
-  matricula: "34550",
-  rt: "Alysson Carlos Vasconcelos",
-  crea: "CREA-PR 176.801/D",
+  cep: "83.321-000",
+  matricula: "34xxx",
+  rt: "Alysson C.",
+  crea: "CREA-PR 176.xxx/D",
   totalPCI: 241846.66,
   prazoMeses: 8,
 };
