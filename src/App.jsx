@@ -6,6 +6,7 @@ import { NotasFiscais } from './components/NotasFiscais';
 import { CNO } from './components/CNO';
 import { Estatisticas } from './components/Estatisticas';
 import { Modal } from './components/Modal';
+import { ModalPDF } from './components/ModalPDF';
 import { ModalEditarPCI } from './components/ModalEditarPCI';
 import { OBRA_INFO as dadosIniciais, getPCIItens, savePCIValor } from './data/pci';
 
@@ -52,6 +53,7 @@ export default function App() {
   const [etapaEditPCI, setEtapaEditPCI]     = useState(null);
   const [itemEditar, setItemEditar]         = useState(null);
   const [etapaPreSel, setEtapaPreSel]       = useState(1);
+  const [modalPDF, setModalPDF] = useState(false);
 
   function abrirNovo(etapaId) {
     setItemEditar(null);
@@ -95,7 +97,14 @@ export default function App() {
             padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#fff'
           }}>
             ⚙️ Editar Obra
+            
           </button>
+          <button onClick={() => setModalPDF(true)} style={{
+  background: '#2a2a2a', border: '1px solid #444', borderRadius: 6,
+  padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#fff'
+}}>
+  📄 Gerar PDF
+</button>
         </div>
 
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -118,6 +127,7 @@ export default function App() {
           obraInfo={obraInfo} totEtapa={totEtapa} totGeral={totGeral}
           onNovoLancamento={() => abrirNovo(null)} onEditarPCI={setEtapaEditPCI} />
       )}
+      
       {abaAtiva === 'etapas' && (
         <Etapas itens={itens} pciItens={pciItens} totEtapa={totEtapa}
           onNovo={abrirNovo} onEditar={abrirEditar} onDeletar={deleteItem}
@@ -169,9 +179,19 @@ export default function App() {
               width: '100%', marginTop: 20, padding: 12, borderRadius: 8,
               background: '#185FA5', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600
             }}>✅ Salvar e Fechar</button>
+            
+
+
           </div>
         </div>
       )}
-    </div>
+    <ModalPDF
+  aberto={modalPDF}
+  onFechar={() => setModalPDF(false)}
+  itens={itens}
+  pciItens={pciItens}
+  obraInfo={obraInfo}
+  totalPCI={totalPCI}
+/></div>
   );
 }

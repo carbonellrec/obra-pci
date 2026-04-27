@@ -22,6 +22,7 @@ export const PCI_ITENS = [
 ];
 
 export const OBRA_INFO = {
+<<<<<<< HEAD
   proprietario: "Fabiano da Silva",
   cpf: "982.xxx.xxx-72",
   endereco: "Rua José de Alencar, 419 - ",
@@ -30,6 +31,16 @@ export const OBRA_INFO = {
   matricula: "34xxx",
   rt: "Alysson C.",
   crea: "CREA-PR 176.xxx/D",
+=======
+  proprietario: "Fabiano C. da Silva",
+  cpf: "982.7xx.xxx-02",
+  endereco: "Rua José de Alencar, 419 - U 09",
+  cidade: "Pinhais/PR",
+  cep: "83.321-000",
+  matricula: "34550",
+  rt: "Alysson C. Vasconcelos",
+  crea: "CREA-PR 176.xx1/D",
+>>>>>>> 4d6bd29 (feat: add PDF report generator and statistics dashboard)
   totalPCI: 241846.66,
   prazoMeses: 8,
 };
