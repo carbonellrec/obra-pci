@@ -8,52 +8,64 @@ import { Estatisticas } from './components/Estatisticas';
 import { Modal } from './components/Modal';
 import { ModalPDF } from './components/ModalPDF';
 import { ModalEditarPCI } from './components/ModalEditarPCI';
+import { Login } from './components/Login';
 import { OBRA_INFO as dadosIniciais, getPCIItens, savePCIValor } from './data/pci';
+import { supabase } from './lib/supabase';
 
 const ABAS = [
   { id: 'dashboard', label: '📊 Dashboard' },
-  { id: 'etapas',    label: '🏗️ Por Etapa'  },
+  { id: 'etapas',    label: '🏗️ Por Etapa' },
   { id: 'nf',        label: '🧾 Notas Fiscais' },
-  { id: 'cno', label: '📋 CNO' },
-  { id: 'stats', label: '📈 Estatísticas' },
+  { id: 'cno',       label: '📋 CNO' },
+  { id: 'stats',     label: '📈 Estatísticas' },
 ];
 
 export default function App() {
+  // ── TODOS OS HOOKS PRIMEIRO ──
+  const [usuario, setUsuario]               = useState(null);
+  const [carregandoAuth, setCarregandoAuth] = useState(true);
   const { itens, addItem, updateItem, deleteItem, totEtapa, totGeral } = useObraData();
+  const [pciItens, setPciItens]             = useState(() => getPCIItens());
+  const totalPCI                            = pciItens.reduce((s, e) => s + e.pci, 0);
+  const [obraInfo, setObraInfo]             = useState(() => {
+    try {
+      const s = localStorage.getItem('obra_pci_info');
+      return s ? JSON.parse(s) : dadosIniciais;
+    } catch { return dadosIniciais; }
+  });
+  const [abaAtiva, setAbaAtiva]               = useState('dashboard');
+  const [modalAberto, setModalAberto]         = useState(false);
+  const [modalObraAberta, setModalObraAberta] = useState(false);
+  const [modalPDF, setModalPDF]               = useState(false);
+  const [etapaEditPCI, setEtapaEditPCI]       = useState(null);
+  const [itemEditar, setItemEditar]           = useState(null);
+  const [etapaPreSel, setEtapaPreSel]         = useState(1);
 
-  // PCI com valores editáveis
-  const [pciItens, setPciItens] = useState(() => getPCIItens());
-  const totalPCI = pciItens.reduce((s, e) => s + e.pci, 0);
+  // Verifica sessão ativa ao carregar
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUsuario(data.session?.user || null);
+      setCarregandoAuth(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUsuario(session?.user || null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('obra_pci_info', JSON.stringify(obraInfo));
+  }, [obraInfo]);
 
   const atualizarPCI = useCallback((id, novoValor) => {
     savePCIValor(id, novoValor);
     setPciItens(prev => prev.map(e => e.id === id ? { ...e, pci: novoValor } : e));
   }, []);
 
-  // Dados da obra editáveis
-  const [obraInfo, setObraInfo] = useState(() => {
-    try {
-      const s = localStorage.getItem('obra_pci_info');
-      return s ? JSON.parse(s) : dadosIniciais;
-    } catch { return dadosIniciais; }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('obra_pci_info', JSON.stringify(obraInfo));
-  }, [obraInfo]);
-
   function handleObraChange(e) {
     const { name, value } = e.target;
     setObraInfo(prev => ({ ...prev, [name]: value }));
   }
-
-  const [abaAtiva, setAbaAtiva]             = useState('dashboard');
-  const [modalAberto, setModalAberto]       = useState(false);
-  const [modalObraAberta, setModalObraAberta] = useState(false);
-  const [etapaEditPCI, setEtapaEditPCI]     = useState(null);
-  const [itemEditar, setItemEditar]         = useState(null);
-  const [etapaPreSel, setEtapaPreSel]       = useState(1);
-  const [modalPDF, setModalPDF] = useState(false);
 
   function abrirNovo(etapaId) {
     setItemEditar(null);
@@ -73,6 +85,15 @@ export default function App() {
     setItemEditar(null);
   }
 
+  // ── RETORNOS CONDICIONAIS DEPOIS DOS HOOKS ──
+  if (carregandoAuth) return (
+    <div style={{ minHeight: '100vh', background: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#aaa', fontSize: 14 }}>⏳ Carregando...</div>
+    </div>
+  );
+
+  if (!usuario) return <Login onLogin={setUsuario} />;
+
   return (
     <div style={{ minHeight: '100vh', background: '#121212', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
 
@@ -83,7 +104,7 @@ export default function App() {
         justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
         position: 'sticky', top: 0, zIndex: 100
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600 }}>
               Obra<span style={{ color: '#185FA5' }}>PCI</span>
@@ -95,16 +116,15 @@ export default function App() {
           <button onClick={() => setModalObraAberta(true)} style={{
             background: '#2a2a2a', border: '1px solid #444', borderRadius: 6,
             padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#fff'
-          }}>
-            ⚙️ Editar Obra
-            
-          </button>
+          }}>⚙️ Editar Obra</button>
           <button onClick={() => setModalPDF(true)} style={{
-  background: '#2a2a2a', border: '1px solid #444', borderRadius: 6,
-  padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#fff'
-}}>
-  📄 Gerar PDF
-</button>
+            background: '#2a2a2a', border: '1px solid #444', borderRadius: 6,
+            padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#fff'
+          }}>📄 Gerar PDF</button>
+          <button onClick={() => { supabase.auth.signOut(); setUsuario(null); }} style={{
+            background: '#3a1a1a', border: '1px solid #e24b4a', borderRadius: 6,
+            padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#e24b4a'
+          }}>🚪 Sair</button>
         </div>
 
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -127,7 +147,6 @@ export default function App() {
           obraInfo={obraInfo} totEtapa={totEtapa} totGeral={totGeral}
           onNovoLancamento={() => abrirNovo(null)} onEditarPCI={setEtapaEditPCI} />
       )}
-      
       {abaAtiva === 'etapas' && (
         <Etapas itens={itens} pciItens={pciItens} totEtapa={totEtapa}
           onNovo={abrirNovo} onEditar={abrirEditar} onDeletar={deleteItem}
@@ -137,14 +156,16 @@ export default function App() {
       {abaAtiva === 'cno' && <CNO itens={itens} pciItens={pciItens} />}
       {abaAtiva === 'stats' && <Estatisticas itens={itens} pciItens={pciItens} totalPCI={totalPCI} />}
 
-      {/* Modal lançamento */}
+      {/* Modais */}
       <Modal aberto={modalAberto}
         onFechar={() => { setModalAberto(false); setItemEditar(null); }}
         onSalvar={handleSalvar} itemEditar={itemEditar} etapaPreSel={etapaPreSel} />
 
-      {/* Modal editar valor PCI */}
       <ModalEditarPCI etapa={etapaEditPCI}
         onFechar={() => setEtapaEditPCI(null)} onSalvar={atualizarPCI} />
+
+      <ModalPDF aberto={modalPDF} onFechar={() => setModalPDF(false)}
+        itens={itens} pciItens={pciItens} obraInfo={obraInfo} totalPCI={totalPCI} />
 
       {/* Modal editar obra */}
       {modalObraAberta && (
@@ -179,19 +200,9 @@ export default function App() {
               width: '100%', marginTop: 20, padding: 12, borderRadius: 8,
               background: '#185FA5', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600
             }}>✅ Salvar e Fechar</button>
-            
-
-
           </div>
         </div>
       )}
-    <ModalPDF
-  aberto={modalPDF}
-  onFechar={() => setModalPDF(false)}
-  itens={itens}
-  pciItens={pciItens}
-  obraInfo={obraInfo}
-  totalPCI={totalPCI}
-/></div>
+    </div>
   );
 }
