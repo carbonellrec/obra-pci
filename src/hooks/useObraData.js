@@ -1,43 +1,102 @@
-
 import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'obra-pci-lancamentos';
-
-const initialData = [
-  { id: 1001, etapaId: 1, data: '2025-07-19', desc: 'Barracão+lig. provisórias', forn: '', valor: 2902.16, nfnum: '', obs: '', img: null },
-  { id: 1002, etapaId: 1, data: '2025-07-19', desc: 'Alvará de construção', forn: 'Prefeitura Pinhais', valor: 336.28, nfnum: '', obs: '', img: null },
-  { id: 1003, etapaId: 1, data: '2026-04-24', desc: 'Engenharia caixa vistoria', forn: 'Alysson Vasconcelos', valor: 750.00, nfnum: '', obs: '', img: null },
-  { id: 1004, etapaId: 1, data: '2025-10-07', desc: 'Engenheiro projeto', forn: 'Alysson Vasconcelos', valor: 5000.00, nfnum: '', obs: '', img: null },
-  { id: 1005, etapaId: 1, data: '2025-10-06', desc: 'Engenheiro planilha PCI', forn: 'Alysson Vasconcelos', valor: 1275.18, nfnum: '', obs: '', img: null },
-  { id: 1006, etapaId: 1, data: '2025-10-08', desc: 'Registro de imóveis matrícula 34550', forn: 'Cartório Pinhais', valor: 62.79, nfnum: '', obs: '', img: null },
-  { id: 1007, etapaId: 2, data: '2026-01-10', desc: 'Infraestrutura (estacas/brocas/baldrames/sapatas)', forn: '', valor: 17171.11, nfnum: '', obs: '', img: null },
-  { id: 1008, etapaId: 3, data: '2026-02-05', desc: 'Superestrutura (vigas/pilares/cintas/escadas)', forn: '', valor: 42565.01, nfnum: '', obs: '', img: null },
-];
+import { supabase } from '../lib/supabase';
 
 export function useObraData() {
-  const [itens, setItens] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : initialData;
-    } catch {
-      return initialData;
-    }
-  });
+  const [itens, setItens] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
+  // Carrega do Supabase
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(itens));
-  }, [itens]);
+    async function carregar() {
+      const { data, error } = await supabase
+        .from('lancamentos')
+        .select('*')
+        .order('data', { ascending: false });
+      if (!error && data) {
+        setItens(data.map(i => ({
+          id: i.id,
+          etapaId: i.etapa_id,
+          data: i.data,
+          desc: i.descricao,
+          forn: i.forn,
+          valor: +i.valor,
+          nfnum: i.nfnum,
+          obs: i.obs,
+          img: i.img,
+        })));
+      }
+      setCarregando(false);
+    }
+    carregar();
+  }, []);
 
-  function addItem(item) {
-    setItens(prev => [...prev, { ...item, id: Date.now() }]);
+  async function addItem(item) {
+    const { data, error } = await supabase
+      .from('lancamentos')
+      .insert([{
+        etapa_id: item.etapaId,
+        data: item.data || null,
+        descricao: item.desc,
+        forn: item.forn || null,
+        valor: item.valor,
+        nfnum: item.nfnum || null,
+        obs: item.obs || null,
+        img: item.img || null,
+      }])
+      .select()
+      .single();
+    if (!error && data) {
+      setItens(prev => [{
+        id: data.id,
+        etapaId: data.etapa_id,
+        data: data.data,
+        desc: data.descricao,
+        forn: data.forn,
+        valor: +data.valor,
+        nfnum: data.nfnum,
+        obs: data.obs,
+        img: data.img,
+      }, ...prev]);
+    }
   }
 
-  function updateItem(id, data) {
-    setItens(prev => prev.map(i => i.id === id ? { ...i, ...data } : i));
+  async function updateItem(id, item) {
+    const { error } = await supabase
+      .from('lancamentos')
+      .update({
+        etapa_id: item.etapaId,
+        data: item.data || null,
+        descricao: item.desc,
+        forn: item.forn || null,
+        valor: item.valor,
+        nfnum: item.nfnum || null,
+        obs: item.obs || null,
+        img: item.img || null,
+      })
+      .eq('id', id);
+    if (!error) {
+      setItens(prev => prev.map(i => i.id === id ? {
+        ...i,
+        etapaId: item.etapaId,
+        data: item.data,
+        desc: item.desc,
+        forn: item.forn,
+        valor: item.valor,
+        nfnum: item.nfnum,
+        obs: item.obs,
+        img: item.img,
+      } : i));
+    }
   }
 
-  function deleteItem(id) {
-    setItens(prev => prev.filter(i => i.id !== id));
+  async function deleteItem(id) {
+    const { error } = await supabase
+      .from('lancamentos')
+      .delete()
+      .eq('id', id);
+    if (!error) {
+      setItens(prev => prev.filter(i => i.id !== id));
+    }
   }
 
   function totEtapa(etapaId) {
@@ -48,5 +107,5 @@ export function useObraData() {
     return itens.reduce((s, i) => s + (+i.valor || 0), 0);
   }
 
-  return { itens, addItem, updateItem, deleteItem, totEtapa, totGeral };
+  return { itens, carregando, addItem, updateItem, deleteItem, totEtapa, totGeral };
 }
