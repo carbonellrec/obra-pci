@@ -2,48 +2,55 @@
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 
-A mission-critical management dashboard designed to track construction costs, fiscal compliance, and technical progress for the **PCI (Proposta de Construção Individual)** financing model. This application bridges the gap between software engineering and civil engineering by providing real-time financial health monitoring.
+Um dashboard de gestão de missão crítica concebido para acompanhar custos de construção, conformidade fiscal e progresso técnico para o modelo de financiamento **PCI (Proposta de Construção Individual)** da Caixa Económica Federal. Esta aplicação une a engenharia de software à engenharia civil, fornecendo monitorização da saúde financeira em tempo real com uma infraestrutura robusta na nuvem.
 
-## 🎯 Business Problem
-Managing residential construction financing in Brazil (via Caixa Econômica Federal) requires strict adherence to planned stages. Small deviations in cost can lead to significant financial gaps. **ObraPCI** solves this by providing a "Planned vs. Actual" analysis engine, ensuring transparency and fiscal control.
+## 🎯 Problema de Negócio
+A gestão do financiamento de construção residencial no Brasil exige uma adesão estrita às etapas planeadas. Pequenos desvios de custos podem levar a lacunas financeiras significativas. O **ObraPCI** resolve isto fornecendo um motor de análise "Planeado vs. Real", garantindo transparência e controlo fiscal através de um ambiente multi-utilizador seguro.
 
-## 🌟 Key Features
+## 🌟 Funcionalidades Principais
 
-- **Dynamic Financial Engine:** Real-time editing of PCI stage values with instant global state synchronization.
-- **Advanced Analytics:** Automated calculation of cost variance, execution percentages, and project health indicators.
-- **State Persistence:** Implemented local storage synchronization to ensure data integrity across browser sessions without needing a backend.
-- **Modular Dashboard:** High-density UI for monitoring 20+ construction stages simultaneously with visual alerts (Red/Green variance).
-- **Compliance Tracking:** Management of Tax Invoices (NF), CNO (National Works Registry), and Professional Responsibility (RT).
+- **🔐 Autenticação Segura:** Integração com **Supabase Auth** para acesso privado, incluindo login por e-mail/senha e persistência de sessão.
+- **📝 Lançamento e Edição Dinâmica (CRUD):** Motor de alta precisão para lançar e editar despesas, com cálculo automático de saldo remanescente por etapa.
+- **☁️ Sincronização em Nuvem:** Migração completa de local storage para uma base de dados **PostgreSQL** em tempo real, garantindo a integridade dos dados em qualquer dispositivo.
+- **📊 Análise Avançada:** Cálculo automatizado de variância de custos, IDC (Índice de Desempenho de Custos) e indicadores de saúde do projeto.
+- **🛡️ Segurança ao Nível da Linha (RLS):** Segurança de nível empresarial onde os dados de cada utilizador são isolados ao nível da base de dados via políticas SQL.
+- **📄 Relatórios Profissionais:** Geração automatizada de relatórios de progresso em PDF para bancos/clientes utilizando **jsPDF**.
 
-## 🛠️ Technical Stack & Engineering Skills
+## 🛠️ Stack Técnica e Competências de Engenharia
 
-- **Frontend:** **React.js** using Functional Components and Modern Hooks strategy (`useState`, `useEffect`, `useMemo`).
-- **State Management:** Complex local state handling for multi-tab navigation and nested data structures.
-- **Architecture:** Modular design pattern (Separation of Concerns) with dedicated folders for Components, Hooks, Data, and Utils.
-- **Environment:** Developed in a professional **Linux (Ubuntu/WSL2)** environment, leveraging Git for granular version control.
+- **Frontend:** **React.js** utilizando Componentes Funcionais e estratégia moderna de Hooks (`useState`, `useEffect`, `useCallback`).
+- **Backend-as-a-Service (BaaS):** **Supabase** (PostgreSQL, Auth e gestão de API).
+- **Deployment & CI/CD:** Alojado na **Vercel** com integração de pipeline automatizada e variáveis de ambiente encriptadas.
+- **Arquitetura:** Padrão de design modular (**Separação de Conceitos**) com pastas dedicadas para lógica, UI e dados.
+- **Ambiente:** Desenvolvido num ambiente profissional **Linux (Ubuntu/WSL2)**, utilizando Git para controlo de versões granular.
 
-## 📐 Architecture & Modularization
+## 📐 Arquitetura e Modularização
 
-The project is structured to be scalable and maintainable:
-- `src/components`: UI Atomic units and complex layouts (Dashboard, Statistics, Modals).
-- `src/hooks`: Custom business logic (e.g., `useObraData.js`) separating state management from UI.
-- `src/utils`: Data formatting and mathematical helpers.
-- `src/data`: Schema definitions for the PCI financing model.
+O projeto está estruturado para ser escalável e de fácil manutenção:
+- `src/lib`: Configuração centralizada do cliente Supabase e inicialização da API.
+- `src/components`: Unidades atómicas de UI e layouts complexos (Dashboard, Login, Modais de Edição).
+- `src/hooks`: Lógica de negócio personalizada (ex: `useObraData.js`) separando a manipulação de dados da renderização da UI.
+- `src/utils`: Auxiliares matemáticos de alta precisão e formatadores de dados.
+- `src/data`: Definições de esquema para as 20+ etapas de construção do PCI.
 
-## 🚀 Future Roadmap
+## 🚀 Conquistas e Roadmap
 
-- [ ] **PDF Reporting:** Automated generation of progress reports for banks/clients.
-- [ ] **Cloud Sync:** Migration from LocalStorage to a cloud-based NoSQL database.
-- [ ] **Visual Analytics:** Integration of Chart.js for burn-down and spending projection charts.
+- [x] **Migração para Nuvem:** Transição bem-sucedida de LocalStorage para PostgreSQL em tempo real.
+- [x] **Lógica de Edição:** Implementação total de mutação de dados (Update/Delete) para lançamentos de obra.
+- [x] **Autenticação:** Fluxo completo de Login/Registo implementado.
+- [ ] **Análise Visual:** Integração de Chart.js para gráficos de projeção de gastos e burn-down.
+- [ ] **Suporte PWA:** Acesso offline para estaleiros de obra com baixa conectividade.
 
 ---
 
-## 👩‍💻 About the Developer
+## 👩‍💻 Sobre o Desenvolvedor
 
-I am a **Software Engineer** specializing in creating reactive, data-driven applications that solve real-world problems. With a background in **Software Engineering** and a focus on high-performance web tools, I build software that is both technically robust and user-centric.
+Sou um **Engenheiro de Software** especializado na criação de aplicações reativas e orientadas a dados que resolvem problemas do mundo real. Com foco em ferramentas web de alto desempenho, construo software que é tecnicamente robusto e centrado no utilizador.
 
 ---
-*Developed with focus on Engineering Excellence by Priscila Goulart Carbonell*
+*Desenvolvido com foco na Excelência em Engenharia por **Fabiano Carbonell da Silva***
